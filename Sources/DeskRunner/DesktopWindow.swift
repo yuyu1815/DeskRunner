@@ -28,9 +28,7 @@ final class DesktopWindow: NSPanel {
         hasShadow = true
         isMovableByWindowBackground = true
 
-        let hosting = NSHostingView(rootView: content)
-        hosting.menu = Self.makeMenu()
-        contentView = hosting
+        contentView = NSHostingView(rootView: content)
         setFrameAutosaveName("DeskRunner.DesktopWindow")
         // 旧サイズで保存された frame が復元されても大きさは固定する
         setContentSize(Self.size)
@@ -46,14 +44,24 @@ final class DesktopWindow: NSPanel {
     }
 
     // ドラッグ開始 (ウィンドウ移動の追跡はこの中で走る) で吸着アニメーションを止め、掴んだ位置から動かせるようにする
+    // NSHostingView.menu は SwiftUI 側に右クリックを取られて出ないので、ウィンドウで受けて出す
     override func sendEvent(_ event: NSEvent) {
-        if event.type == .leftMouseDown { cancelSettle() }
+        switch event.type {
+        case .rightMouseDown:
+            if let contentView { NSMenu.popUpContextMenu(Self.makeMenu(), with: event, for: contentView) }
+            return
+        case .leftMouseDown:
+            cancelSettle()
+        default:
+            break
+        }
         super.sendEvent(event)
     }
 
     private static func makeMenu() -> NSMenu {
         let menu = NSMenu()
-        menu.addItem(withTitle: "終了", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "")
+        let quit = menu.addItem(withTitle: "終了", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "")
+        quit.target = NSApp
         return menu
     }
 
