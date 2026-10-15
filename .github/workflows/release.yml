@@ -1,0 +1,25 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build app
+        run: VERSION="${GITHUB_REF_NAME#v}" ./Packaging/build-app.sh
+
+      - name: Zip app
+        run: ditto -c -k --keepParent dist/DeskRunner.app "DeskRunner-${GITHUB_REF_NAME}.zip"
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" "DeskRunner-${GITHUB_REF_NAME}.zip" --generate-notes

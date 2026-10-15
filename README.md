@@ -17,15 +17,22 @@ macOS のデスクトップに置く、猫が平原を走るシステムモニ�
 - macOS 26 以降
 - Swift 6.2 以降 (ビルドする場合)
 
-## ビルドとインストール
+## ダウンロード
+
+[Releases](https://github.com/yuyu1815/DeskRunner/releases) から `DeskRunner-<バージョン>.zip` をダウンロードして展開し、`DeskRunner.app` を `/Applications` に移します。
+
+Apple の公証を受けていないため、初回は「開けません」と表示されます。その場合は次のどちらかで開いてください。
+
+- システム設定 →「プライバシーとセキュリティ」の下にある「このまま開く」を押す
+- ターミナルで `xattr -dr com.apple.quarantine /Applications/DeskRunner.app` を実行する
+
+## ソースからビルド
 
 ```sh
 ./Packaging/build-app.sh
 cp -R dist/DeskRunner.app /Applications/
 open /Applications/DeskRunner.app
 ```
-
-署名はアドホックです。初回起動で警告が出た場合は Finder で右クリック →「開く」を選んでください。
 
 ## 設定
 

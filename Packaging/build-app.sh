@@ -10,6 +10,9 @@ app=dist/DeskRunner.app
 rm -rf "$app"
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
 cp Packaging/Info.plist "$app/Contents/Info.plist"
+if [ -n "${VERSION:-}" ]; then
+    /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$app/Contents/Info.plist"
+fi
 cp "$bin/DeskRunner" "$app/Contents/MacOS/DeskRunner"
 cp Sources/DeskRunner/Resources/*.png "$app/Contents/Resources/"
 cp LICENSE* "$app/Contents/Resources/"
