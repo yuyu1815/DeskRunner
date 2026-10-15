@@ -16,6 +16,7 @@ fi
 cp "$bin/DeskRunner" "$app/Contents/MacOS/DeskRunner"
 cp Sources/DeskRunner/Resources/*.png "$app/Contents/Resources/"
 cp LICENSE* "$app/Contents/Resources/"
+cp Packaging/AppIcon.icns "$app/Contents/Resources/"
 
 # ビルドした Mac では欠けた画像を .build から読めてしまい気付けないので、ここで確かめる
 for png in Sources/DeskRunner/Resources/*.png; do
