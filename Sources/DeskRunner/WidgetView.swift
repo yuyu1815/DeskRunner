@@ -8,12 +8,13 @@ struct WidgetView: View {
 
     @AppStorage("showsPercentAsBar") private var showsPercentAsBar = false
     @State private var isShowingSettings = false
-    @State private var launchesAtLogin = SMAppService.mainApp.status == .enabled
+    @State private var loginItemStatus = SMAppService.Status.notRegistered
 
     // 登録の実体はシステム側にあるので、操作後は必ずシステムの状態を読み直す
+    // 承認待ちもオン扱いにして、オフ操作で登録を取り消せるようにする
     private var launchAtLogin: Binding<Bool> {
         Binding(
-            get: { launchesAtLogin },
+            get: { loginItemStatus == .enabled || loginItemStatus == .requiresApproval },
             set: { enabled in
                 do {
                     if enabled {
@@ -24,8 +25,8 @@ struct WidgetView: View {
                 } catch {
                     NSLog("ログイン項目の変更に失敗: \(error)")
                 }
-                launchesAtLogin = SMAppService.mainApp.status == .enabled
-                if SMAppService.mainApp.status == .requiresApproval {
+                loginItemStatus = SMAppService.mainApp.status
+                if loginItemStatus == .requiresApproval {
                     SMAppService.openSystemSettingsLoginItems()
                 }
             }
@@ -57,10 +58,15 @@ struct WidgetView: View {
                             VStack(alignment: .leading, spacing: 8) {
                                 Toggle("% をグラフで表示", isOn: $showsPercentAsBar)
                                 Toggle("ログイン時に起動", isOn: launchAtLogin)
+                                if loginItemStatus == .requiresApproval {
+                                    Text("システム設定のログイン項目で承認待ち")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
                             }
                             .toggleStyle(.switch)
                             .padding(12)
-                            .onAppear { launchesAtLogin = SMAppService.mainApp.status == .enabled }
+                            .onAppear { loginItemStatus = SMAppService.mainApp.status }
                         }
                     }
                 }
@@ -123,6 +129,7 @@ struct WidgetView: View {
         let formatter = ByteCountFormatter()
         formatter.countStyle = .binary
         formatter.allowsNonnumericFormatting = false
+        formatter.allowedUnits = [.useKB, .useMB, .useGB, .useTB]
         return formatter.string(fromByteCount: Int64(bytesPerSecond)) + "/s"
     }
 }
